@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Animada y Responsiva</title>
+    <title>Diego's Tinder League</title>
     <!-- Carga de Tailwind CSS para un diseño responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Íconos de Lucide React para los botones -->
@@ -80,6 +80,16 @@
             animation: color-shift 10s infinite alternate, glitch-effect 5s steps(2, start) infinite;
         }
 
+        /* Estilo para el Título Principal (Nuevo) */
+        .main-title {
+            font-size: 1.5rem; /* Ajuste para móviles */
+            font-weight: 700;
+            text-align: center;
+            color: #ff5e62; /* Un rojo/rosa agresivo que evoca Tinder */
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255, 94, 98, 0.7);
+        }
+
         /* Colores inspirados en la paleta de Google/Gemini */
         @keyframes color-shift {
             0% { 
@@ -138,6 +148,9 @@
             .gemini-counter {
                 font-size: 6rem;
             }
+            .main-title {
+                font-size: 3rem;
+            }
         }
 
         /* Estilo de los botones del menú oculto */
@@ -192,10 +205,13 @@
         Haz clic en cualquier parte para activar la música agresiva de fondo.
     </div>
 
-    <!-- Contenido principal: Contador y Menú -->
+    <!-- Contenido principal: Título, Contador y Menú -->
     <main class="flex-grow flex flex-col items-center justify-center p-4 z-30 relative">
+        <!-- Nuevo Título Principal -->
+        <h1 class="main-title">Diego's Tinder League</h1>
+        
         <!-- El Contador -->
-        <div id="counter-display" class="gemini-counter">2.397</div>
+        <div id="counter-display" class="gemini-counter">Cargando...</div>
     </main>
     
     <!-- Sección de Control (Entrada de Texto y Botones) -->
@@ -226,9 +242,148 @@
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        // ----------------------------------------------------
+        // IMPORTS Y CONFIGURACIÓN DE FIREBASE
+        // ----------------------------------------------------
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- INSTRUCCIÓN IMPORTANTE PARA PRODUCCIÓN ---
+        // DEBES REEMPLAZAR EL OBJETO 'customFirebaseConfig' CON LA CONFIGURACIÓN DE TU PROYECTO REAL DE FIREBASE.
+        // Puedes obtener esta configuración desde la consola de Firebase -> Configuración del Proyecto.
+        const customFirebaseConfig = {
+            apiKey: "AIzaSyB2p7rjHo6gdnylnxBJ9yevP7ZPyfiKfyY",
+            authDomain: "diegotinderleague.firebaseapp.com",
+            projectId: "diegotinderleague",
+            storageBucket: "diegotinderleague.firebasestorage.app",
+            messagingSenderId: "571797323174",
+            appId: "1:571797323174:web:cefde0084c28f79378a367",
+
+        };
+    
+        // ---------------------------------------------
+        
+        // La configuración real que se usa en local/producción
+        const firebaseConfig = customFirebaseConfig;
+        
+        // Usamos un ID de artefacto estático para el path de Firestore
+        const appId = firebaseConfig.projectId || 'diego-tinder-league'; 
+
+        // Inicialización de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        let userId = null;
+        let dbReady = false;
+        
+        // Constantes para el contador
+        const counterDisplay = document.getElementById('counter-display');
+        const passwordInput = document.getElementById('password-input');
+        const controlMenu = document.getElementById('control-menu');
+        const decrementButton = document.getElementById('decrement-button');
+        const incrementButton = document.getElementById('increment-button');
+        const passwordCode = "Diego2500";
+        const DEFAULT_COUNT = 2397; // Valor inicial si no hay datos guardados
+        let currentCount = DEFAULT_COUNT; 
+
+        // Función para obtener la referencia del documento del contador
+        function getCounterDocRef(uid) {
+            // Ruta para el contador del usuario: /artifacts/{appId}/users/{userId}/counter/value
+            // Nota: La estructura usa 'users/{userId}' y 'artifacts/{appId}' para simular un path seguro.
+            return doc(db, `artifacts/${appId}/users/${uid}/counter`, 'value');
+        }
+
+        // Función para formatear el número (añadir el punto como separador de miles)
+        function formatNumber(number) {
+            return number.toLocaleString('es-ES');
+        }
+
+        // Función para cargar el contador desde Firestore
+        async function loadCounter(uid) {
+            try {
+                const docRef = getCounterDocRef(uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentCount = data.value || DEFAULT_COUNT;
+                } else {
+                    // Si no existe, usamos el valor por defecto y lo guardamos
+                    await saveCounter(DEFAULT_COUNT, uid);
+                }
+                counterDisplay.textContent = formatNumber(currentCount);
+            } catch (error) {
+                console.error("Error al cargar el contador:", error);
+                counterDisplay.textContent = formatNumber(currentCount); // Muestra el valor por defecto en caso de error
+            }
+        }
+
+        // Función para guardar el contador en Firestore
+        async function saveCounter(value, uid) {
+            if (!dbReady || !uid) return;
+            try {
+                const docRef = getCounterDocRef(uid);
+                await setDoc(docRef, { value: value });
+            } catch (error) {
+                console.error("Error al guardar el contador:", error);
+            }
+        }
+        
+        // ----------------------------------------------------
+        // AUTENTICACIÓN Y ARRANQUE
+        // ----------------------------------------------------
+        // En un entorno de producción, la forma más simple es usar autenticación anónima.
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                dbReady = true;
+                // Una vez autenticado, cargamos el contador guardado
+                await loadCounter(userId);
+            } else {
+                // Si no hay usuario, iniciamos sesión de forma anónima
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Error de autenticación:", error);
+                    counterDisplay.textContent = "Error de Auth";
+                }
+            }
+        });
+
+        // ----------------------------------------------------
+        // Lógica del Contador y del Menú Oculto
+        // ----------------------------------------------------
+        
+        // Función para actualizar el contador (y guardarlo en la DB)
+        function updateCounter(amount) {
+            currentCount += amount;
+            counterDisplay.textContent = formatNumber(currentCount);
+            if (dbReady && userId) {
+                // Llama a la función de guardado
+                saveCounter(currentCount, userId);
+            }
+        }
+
         // Inicializa los íconos de Lucide (los signos +/-)
         lucide.createIcons();
+        
+        // 4. Lógica para desbloquear el menú
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value === passwordCode) {
+                controlMenu.classList.remove('hidden');
+                passwordInput.blur(); // Opcional: Quita el foco del input
+                passwordInput.value = '¡Menú Desbloqueado!';
+                passwordInput.disabled = true;
+                passwordInput.classList.add('border-green-500');
+            }
+        });
+
+        // 5. Asignación de eventos a los botones
+        decrementButton.addEventListener('click', () => updateCounter(-1));
+        incrementButton.addEventListener('click', () => updateCounter(1));
 
         // ----------------------------------------------------
         // Lógica de Audio (Música AGRESIVA de Fondo)
@@ -298,49 +453,6 @@
 
         // Activación de la música con la primera interacción del usuario
         document.body.addEventListener('click', playEpicMusic, { once: true });
-
-
-        // ----------------------------------------------------
-        // Lógica del Contador y del Menú Oculto
-        // ----------------------------------------------------
-
-        const counterDisplay = document.getElementById('counter-display');
-        const passwordInput = document.getElementById('password-input');
-        const controlMenu = document.getElementById('control-menu');
-        const decrementButton = document.getElementById('decrement-button');
-        const incrementButton = document.getElementById('increment-button');
-        const passwordCode = "Diego2500";
-        let currentCount = 2397; // El número inicial, sin el punto para operar
-
-        // Función para formatear el número (añadir el punto como separador de miles)
-        function formatNumber(number) {
-            // Utilizamos la configuración regional 'es-ES' (España) para usar el punto como separador de miles
-            return number.toLocaleString('es-ES');
-        }
-
-        // Inicializa el display con el formato correcto
-        counterDisplay.textContent = formatNumber(currentCount);
-
-        // 4. Lógica para desbloquear el menú
-        passwordInput.addEventListener('input', () => {
-            if (passwordInput.value === passwordCode) {
-                controlMenu.classList.remove('hidden');
-                passwordInput.blur(); // Opcional: Quita el foco del input
-                passwordInput.value = '¡Menú Desbloqueado!';
-                passwordInput.disabled = true;
-                passwordInput.classList.add('border-green-500');
-            }
-        });
-
-        // Función para actualizar el contador
-        function updateCounter(amount) {
-            currentCount += amount;
-            counterDisplay.textContent = formatNumber(currentCount);
-        }
-
-        // 5. Asignación de eventos a los botones
-        decrementButton.addEventListener('click', () => updateCounter(-1));
-        incrementButton.addEventListener('click', () => updateCounter(1));
 
 
         // ----------------------------------------------------
