@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Animada y Responsiva</title>
+    <!-- Carga de Tailwind CSS para un diseño responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Íconos de Lucide React para los botones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tone.js para la música y sonidos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        /* 1. Fondo Azul Oscuro */
+        body {
+            background-color: #03045e; /* Azul muy oscuro */
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Oculta el desbordamiento de las imágenes animadas */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* 2. Animación de las Imágenes de Fondo */
+        .image-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Asegura que el contador sea clickeable */
+            z-index: 10;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            width: 150vw; /* Más ancho que la pantalla para el movimiento */
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5; /* Opacidad para que el fondo oscuro se mantenga */
+            animation: image-scroll 40s infinite linear; /* Aumentado a 40s para el nuevo número de imágenes */
+            transition: opacity 1s ease-in-out;
+            transform: translateX(100vw); /* Inicialmente fuera de la pantalla a la derecha */
+        }
+
+        /* Definición de la animación específica solicitada: Rápida entrada, freno progresivo al centro, pausa, y salida rápida */
+        @keyframes image-scroll {
+            /* Entra rápido desde la derecha */
+            0% { transform: translateX(100vw); opacity: 0; }
+            5% { transform: translateX(5vw); opacity: 0.5; } /* Frenada progresiva */
+            10% { transform: translateX(0); opacity: 0.7; }
+            
+            /* Pausa de 2 segundos (del 10% al 20% del ciclo de 30s) */
+            10% { transform: translateX(0); opacity: 0.7; }
+            20% { transform: translateX(0); opacity: 0.7; }
+            
+            /* Salida rápida a la izquierda */
+            25% { transform: translateX(-5vw); opacity: 0.5; } /* Aceleración progresiva */
+            30% { transform: translateX(-150vw); opacity: 0; }
+            
+            /* El resto del tiempo estará invisible para permitir la rotación */
+            31% { transform: translateX(100vw); opacity: 0; }
+            100% { transform: translateX(100vw); opacity: 0; }
+        }
+
+        /* 3. Contador con Múltiples Colores (Efecto Gemini) y Glitch */
+        .gemini-counter {
+            font-size: 10vw; /* Responsivo: 10% del ancho del viewport */
+            font-weight: 900;
+            text-align: center;
+            color: white;
+            z-index: 20;
+            position: relative;
+            user-select: none;
+            cursor: default;
+            
+            /* Animación lenta de text-shadow para simular colores móviles */
+            animation: color-shift 10s infinite alternate, glitch-effect 5s steps(2, start) infinite;
+        }
+
+        /* Colores inspirados en la paleta de Google/Gemini */
+        @keyframes color-shift {
+            0% { 
+                text-shadow: 
+                    2px 2px 5px #4285F4, /* Azul */
+                    -2px -2px 5px #0F9D58; /* Verde */
+            }
+            25% {
+                 text-shadow: 
+                    2px 2px 5px #F4B400, /* Amarillo */
+                    -2px -2px 5px #DB4437; /* Rojo */
+            }
+            50% { 
+                text-shadow: 
+                    -2px 2px 5px #EA30E9, /* Magenta (como el color Gemini) */
+                    2px -2px 5px #00FFFF; /* Cyan */
+            }
+            75% { 
+                text-shadow: 
+                    2px -2px 5px #4285F4, /* Azul */
+                    -2px 2px 5px #F4B400; /* Amarillo */
+            }
+            100% { 
+                text-shadow: 
+                    -2px -2px 5px #DB4437, /* Rojo */
+                    2px 2px 5px #0F9D58; /* Verde */
+            }
+        }
+        
+        /* Efecto Glitch */
+        @keyframes glitch-effect {
+            0% {
+                transform: translate(0);
+            }
+            20% {
+                transform: translate(-3px, 3px);
+                opacity: 0.9;
+            }
+            40% {
+                transform: translate(-3px, -3px);
+            }
+            60% {
+                transform: translate(3px, 3px);
+                opacity: 0.95;
+            }
+            80% {
+                transform: translate(3px, -3px);
+            }
+            100% {
+                transform: translate(0);
+            }
+        }
+
+        /* Ajuste para pantallas más grandes */
+        @media (min-width: 768px) {
+            .gemini-counter {
+                font-size: 6rem;
+            }
+        }
+
+        /* Estilo de los botones del menú oculto */
+        .control-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1f2937, #111827);
+            box-shadow: 8px 8px 16px #0d121b, -8px -8px 16px #2b3a4f;
+            color: white;
+            font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
+        }
+        .control-button:active {
+            box-shadow: inset 4px 4px 8px #0d121b, inset -4px -4px 8px #2b3a4f;
+            transform: scale(0.98);
+        }
+
+        /* Mensaje para el usuario para activar el audio */
+        #audio-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            z-index: 50; /* Por encima de todo */
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Contenedor para las imágenes de fondo -->
+    <div id="image-carousel" class="image-container">
+        <!-- ¡IMPORTANTE! Las rutas se han actualizado a la carpeta 'images' y se ha añadido un cuarto elemento -->
+        <img class="background-image hidden" data-index="0" src="./images/foto0.jpg" alt="Fondo 1">
+        <img class="background-image hidden" data-index="1" src="./images/foto1.jpg" alt="Fondo 2">
+        <img class="background-image hidden" data-index="2" src="./images/foto2.jpg" alt="Fondo 3">
+        <img class="background-image hidden" data-index="3" src="./images/foto3.jpg" alt="Fondo 4">
+    </div>
+
+    <!-- Mensaje para activar el audio -->
+    <div id="audio-hint" class="hidden">
+        Haz clic en cualquier parte para activar la música agresiva de fondo.
+    </div>
+
+    <!-- Contenido principal: Contador y Menú -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 z-30 relative">
+        <!-- El Contador -->
+        <div id="counter-display" class="gemini-counter">2.397</div>
+    </main>
+    
+    <!-- Sección de Control (Entrada de Texto y Botones) -->
+    <footer class="w-full p-4 bg-gray-900/50 backdrop-blur-sm z-30">
+        <div class="max-w-md mx-auto">
+            
+            <!-- Entrada de texto para desbloquear el menú -->
+            <input 
+                type="text" 
+                id="password-input" 
+                placeholder="Introduce el código de control aquí..."
+                class="w-full p-3 mb-4 text-white bg-gray-700/80 border border-gray-600 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-300"
+            >
+
+            <!-- Menú Oculto -->
+            <div id="control-menu" class="hidden flex justify-center space-x-8 mt-4">
+                
+                <!-- Botón Decrementar -->
+                <button id="decrement-button" class="control-button shadow-2xl">
+                    <i data-lucide="minus" class="w-10 h-10"></i>
+                </button>
+                
+                <!-- Botón Incrementar -->
+                <button id="increment-button" class="control-button shadow-2xl">
+                    <i data-lucide="plus" class="w-10 h-10"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Inicializa los íconos de Lucide (los signos +/-)
+        lucide.createIcons();
+
+        // ----------------------------------------------------
+        // Lógica de Audio (Música AGRESIVA de Fondo)
+        // ----------------------------------------------------
+        const audioHint = document.getElementById('audio-hint');
+        let isMusicPlaying = false;
+        
+        // Muestra el mensaje para que el usuario active el audio
+        audioHint.classList.remove('hidden');
+
+        // 1. Efectos agresivos: Distortion y Reverb
+        const distortion = new Tone.Distortion(0.8).toDestination(); // Distorsión alta
+        const reverb = new Tone.Reverb(3).toDestination();
+        distortion.connect(reverb);
+        
+        // Crea un sintetizador con un ataque rápido y timbre áspero
+        const synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: 'square' }, // Onda cuadrada es más dura que sierra
+            envelope: {
+                attack: 0.1,  // Ataque rápido
+                decay: 0.2,
+                sustain: 0.5, // Sostenido más largo
+                release: 0.5,
+            },
+            filter: {
+                Q: 1,
+                type: "highpass", // Filtro de paso alto para un sonido más "delgado" y cortante
+                rolloff: -12
+            }
+        }).connect(distortion); // Conecta al Distortion
+
+        // 2. Melodía "agresiva" simple: Progresión en La menor (Am, G, F, E)
+        const aggressiveChords = [
+            ['A3', 'C4', 'E4'],  // Am
+            ['G3', 'B3', 'D4'],  // G
+            ['F3', 'A3', 'C4'],  // F
+            ['E3', 'G#3', 'B3'], // E (dominante)
+        ];
+        
+        let chordIndex = 0;
+
+        function playEpicMusic() {
+            if (isMusicPlaying) return;
+            isMusicPlaying = true;
+            audioHint.classList.add('hidden');
+            
+            // Inicia Tone.js
+            Tone.start();
+
+            // Lógica de bucle para la progresión
+            new Tone.Loop(time => {
+                const notes = aggressiveChords[chordIndex % aggressiveChords.length];
+                
+                // Toca el acorde base
+                synth.triggerAttackRelease(notes, "1n", time, 0.6); // 0.6 volumen
+                
+                // Toca una octava más baja para el bajo
+                synth.triggerAttackRelease(notes[0].replace('3', '2'), "1n", time, 0.7); // Bajo (más prominente)
+                
+                chordIndex++;
+            }, "1n").start(0); // Bucle cada 1 nota (1 segundo a 120 BPM)
+            
+            // Inicia el transporte (el motor de tiempo)
+            Tone.Transport.bpm.value = 120; // BPM más rápido
+            Tone.Transport.start();
+        }
+
+        // Activación de la música con la primera interacción del usuario
+        document.body.addEventListener('click', playEpicMusic, { once: true });
+
+
+        // ----------------------------------------------------
+        // Lógica del Contador y del Menú Oculto
+        // ----------------------------------------------------
+
+        const counterDisplay = document.getElementById('counter-display');
+        const passwordInput = document.getElementById('password-input');
+        const controlMenu = document.getElementById('control-menu');
+        const decrementButton = document.getElementById('decrement-button');
+        const incrementButton = document.getElementById('increment-button');
+        const passwordCode = "Diego2500";
+        let currentCount = 2397; // El número inicial, sin el punto para operar
+
+        // Función para formatear el número (añadir el punto como separador de miles)
+        function formatNumber(number) {
+            // Utilizamos la configuración regional 'es-ES' (España) para usar el punto como separador de miles
+            return number.toLocaleString('es-ES');
+        }
+
+        // Inicializa el display con el formato correcto
+        counterDisplay.textContent = formatNumber(currentCount);
+
+        // 4. Lógica para desbloquear el menú
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value === passwordCode) {
+                controlMenu.classList.remove('hidden');
+                passwordInput.blur(); // Opcional: Quita el foco del input
+                passwordInput.value = '¡Menú Desbloqueado!';
+                passwordInput.disabled = true;
+                passwordInput.classList.add('border-green-500');
+            }
+        });
+
+        // Función para actualizar el contador
+        function updateCounter(amount) {
+            currentCount += amount;
+            counterDisplay.textContent = formatNumber(currentCount);
+        }
+
+        // 5. Asignación de eventos a los botones
+        decrementButton.addEventListener('click', () => updateCounter(-1));
+        incrementButton.addEventListener('click', () => updateCounter(1));
+
+
+        // ----------------------------------------------------
+        // Lógica de la Rotación de Imágenes
+        // ----------------------------------------------------
+        const images = document.querySelectorAll('.background-image');
+        // Ajustamos la duración total de la animación a 40 segundos ya que hay 4 imágenes.
+        // Esto mantiene el tiempo de visibilidad en el centro en 10 segundos por imagen (25% del ciclo).
+        const totalAnimationDuration = 40000; 
+        const delayBetweenImages = totalAnimationDuration / images.length; 
+        let currentIndex = -1; 
+
+        function startImageCarousel() {
+            images.forEach(img => img.classList.add('hidden'));
+
+            function rotateImage() {
+                if (currentIndex >= 0) {
+                    const previousImage = images[currentIndex];
+                    previousImage.style.animationPlayState = 'paused';
+                    previousImage.style.opacity = '0';
+                    previousImage.classList.add('hidden');
+                }
+
+                currentIndex = (currentIndex + 1) % images.length;
+                const currentImage = images[currentIndex];
+
+                // Forzamos el reinicio de la animación y la hacemos visible
+                currentImage.classList.remove('hidden');
+                currentImage.style.animation = 'none';
+                void currentImage.offsetWidth; 
+                currentImage.style.animation = `image-scroll ${totalAnimationDuration / 1000}s infinite linear`;
+            }
+
+            rotateImage();
+            setInterval(rotateImage, delayBetweenImages);
+        }
+
+        // Asegúrate de que las imágenes se carguen y la animación comience
+        window.onload = startImageCarousel;
+
+        // Lógica de backoff para la API (no necesaria para este app sin API, pero buena práctica)
+        async function fetchWithBackoff(url, options = {}, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response;
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000;
+                    console.error(`Request failed. Retrying in ${delay / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+    </script>
+</body>
+</html>
