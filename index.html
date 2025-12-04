@@ -11,7 +11,7 @@
     <!-- Tone.js para la música y sonidos -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <style>
-        /* 1. Estilos Base */
+        /* 1. Estilos Base y Fondo Oscuro Intenso */
         body {
             background-color: #03045e; /* Azul muy oscuro */
             font-family: 'Inter', sans-serif;
@@ -21,66 +21,75 @@
             flex-direction: column;
             justify-content: space-between;
         }
+        /* Contenido centrado */
+        .main-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 30;
+            position: relative;
+        }
 
-        /* 2. Animación de las Imágenes de Fondo */
+        /* 2. Animación de las Imágenes de Fondo (Revisada) */
         .image-container {
-            position: absolute;
+            position: fixed; /* Usar fixed para que cubra todo y no se mueva */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
             z-index: 10;
+            overflow: hidden;
         }
 
         .background-image {
             position: absolute;
-            top: 0;
             width: 150vw;
             height: 100%;
             object-fit: cover;
-            opacity: 0.5;
+            opacity: 0; /* Inicia invisible */
             transform: translateX(100vw);
+            transition: opacity 2s ease-in-out;
+            filter: grayscale(50%) brightness(0.7);
         }
 
         @keyframes image-scroll {
             0% { transform: translateX(100vw); opacity: 0; }
-            5% { transform: translateX(5vw); opacity: 0.5; }
             10% { transform: translateX(0); opacity: 0.7; }
-            
-            10% { transform: translateX(0); opacity: 0.7; }
-            20% { transform: translateX(0); opacity: 0.7; }
-            
-            25% { transform: translateX(-5vw); opacity: 0.5; }
+            25% { transform: translateX(0); opacity: 0.7; }
             30% { transform: translateX(-150vw); opacity: 0; }
-            
             31% { transform: translateX(100vw); opacity: 0; }
             100% { transform: translateX(100vw); opacity: 0; }
         }
 
-        /* 3. Contador con Efecto Gemini y Glitch */
+        /* 3. Contador con Efecto Gemini (Neón) */
         .gemini-counter {
             font-size: 10vw;
             font-weight: 900;
             text-align: center;
             color: white;
-            z-index: 20;
             position: relative;
             user-select: none;
             cursor: default;
-            
+            /* Mantenemos las animaciones del neón y glitch */
             animation: color-shift 10s infinite alternate, glitch-effect 5s steps(2, start) infinite;
+            margin-bottom: 0.5rem;
         }
 
         .main-title {
             font-size: 1.5rem;
             font-weight: 700;
             text-align: center;
-            color: #ff5e62; 
+            color: #ff5e62; /* Rosa/Rojo de Tinder */
             margin-bottom: 2rem;
             text-shadow: 0 0 10px rgba(255, 94, 98, 0.7);
+            text-transform: uppercase;
         }
 
+        /* Animaciones del contador */
         @keyframes color-shift {
             0% { text-shadow: 2px 2px 5px #4285F4, -2px -2px 5px #0F9D58; }
             25% { text-shadow: 2px 2px 5px #F4B400, -2px -2px 5px #DB4437; }
@@ -88,7 +97,6 @@
             75% { text-shadow: 2px -2px 5px #4285F4, -2px 2px 5px #F4B400; }
             100% { text-shadow: -2px -2px 5px #DB4437, 2px 2px 5px #0F9D58; }
         }
-        
         @keyframes glitch-effect {
             0% { transform: translate(0); }
             20% { transform: translate(-3px, 3px); opacity: 0.9; }
@@ -99,19 +107,20 @@
         }
 
         @media (min-width: 768px) {
-            .gemini-counter { font-size: 6rem; }
+            .gemini-counter { font-size: 8rem; }
             .main-title { font-size: 3rem; }
+            .control-button { width: 120px; height: 120px; font-size: 4rem; }
         }
 
-        /* 4. Estilo de botones */
+        /* 4. Estilo de botones (Neumorfismo Oscuro) */
         .control-button {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: linear-gradient(145deg, #1f2937, #111827);
+            background: #1f2937;
             box-shadow: 8px 8px 16px #0d121b, -8px -8px 16px #2b3a4f;
             color: white;
-            font-size: 3rem;
+            font-size: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -123,47 +132,50 @@
             transform: scale(0.98);
         }
 
-        /* Mensaje para el usuario para activar el audio */
+        /* Mensaje para el usuario para activar el audio y errores */
         #audio-hint, #error-message {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.9);
+            padding: 1.5rem 2rem;
+            background: rgba(0, 0, 0, 0.95);
             color: white;
-            border-radius: 8px;
+            border-radius: 12px;
             text-align: center;
             font-size: 1.2rem;
             z-index: 50;
             border: 3px solid #ff5e62;
+            max-width: 90vw;
         }
+        #error-message { border-color: #ff0000; color: #ffdddd; }
     </style>
 </head>
 <body>
     
     <!-- Contenedor para las imágenes de fondo -->
     <div id="image-carousel" class="image-container">
-        <!-- Asegúrate de que estas rutas son relativas al HTML y las imágenes existen en esa ubicación. -->
-        <img class="background-image hidden" data-index="0" src="./images/foto0.jpg" alt="Fondo 1" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+0'">
-        <img class="background-image hidden" data-index="1" src="./images/foto1.jpg" alt="Fondo 2" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+1'">
-        <img class="background-image hidden" data-index="2" src="./images/foto2.jpg" alt="Fondo 3" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+2'">
-        <img class="background-image hidden" data-index="3" src="./images/foto3.jpg" alt="Fondo 4" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+3'">
+        <!-- Placeholder de imágenes para que no haya errores si las rutas son incorrectas -->
+        <img class="background-image hidden" data-index="0" src="./images/foto0.jpg" alt="Fondo 1" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/1e293b/fff?text=Tinder+League'">
+        <img class="background-image hidden" data-index="1" src="./images/foto1.jpg" alt="Fondo 2" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/1e293b/fff?text=Tinder+League'">
+        <img class="background-image hidden" data-index="2" src="./images/foto2.jpg" alt="Fondo 3" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/1e293b/fff?text=Tinder+League'">
+        <img class="background-image hidden" data-index="3" src="./images/foto3.jpg" alt="Fondo 4" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/1e293b/fff?text=Tinder+League'">
     </div>
 
     <!-- Mensaje para activar el audio -->
     <div id="audio-hint" class="hidden">
-        Haz clic en cualquier parte para activar la música de fondo.
+        <p class="mb-2">¡Bienvenido a la Liga!</p>
+        <p class="text-sm opacity-80">Haz click en cualquier parte para activar la música épica.</p>
     </div>
 
     <!-- Contenedor de mensajes de error de Firebase -->
-    <div id="error-message" class="hidden" style="color:#ff5e62; border-color:#ff5e62;">
-        <p>ERROR DE FIREBASE</p>
+    <div id="error-message" class="hidden">
+        <p class="font-bold">¡ERROR CRÍTICO!</p>
         <p id="error-text" class="text-sm mt-2"></p>
     </div>
 
     <!-- Contenido principal: Título, Contador y Menú -->
-    <main class="flex-grow flex flex-col items-center justify-center p-4 z-30 relative">
+    <main class="main-content-wrapper">
         <!-- Título Principal -->
         <h1 class="main-title">Diego's Tinder League</h1>
         
@@ -177,7 +189,7 @@
     </main>
     
     <!-- Sección de Control (Entrada de Texto y Botones) -->
-    <footer class="w-full p-4 bg-gray-900/50 backdrop-blur-sm z-30">
+    <footer class="w-full p-4 bg-gray-900/80 backdrop-blur-sm z-30">
         <div class="max-w-md mx-auto">
             
             <!-- Entrada de texto para desbloquear el menú -->
@@ -185,19 +197,19 @@
                 type="text" 
                 id="password-input" 
                 placeholder="Introduce el código de control aquí..."
-                class="w-full p-3 mb-4 text-white bg-gray-700/80 border border-gray-600 rounded-xl focus:ring-pink-500 focus:border-pink-500 transition duration-300"
+                class="w-full p-3 mb-4 text-white bg-gray-800/90 border border-gray-600 rounded-xl focus:ring-pink-500 focus:border-pink-500 transition duration-300"
             >
 
             <!-- Menú Oculto -->
             <div id="control-menu" class="hidden flex justify-center space-x-8 mt-4">
                 
                 <!-- Botón Decrementar -->
-                <button id="decrement-button" class="control-button shadow-2xl">
+                <button id="decrement-button" class="control-button text-red-400">
                     <i data-lucide="minus" class="w-10 h-10"></i>
                 </button>
                 
                 <!-- Botón Incrementar -->
-                <button id="increment-button" class="control-button shadow-2xl">
+                <button id="increment-button" class="control-button text-green-400">
                     <i data-lucide="plus" class="w-10 h-10"></i>
                 </button>
             </div>
@@ -217,8 +229,8 @@
 
         // CONFIGURACIÓN DE FIREBASE (Usamos variables de entorno de Canvas)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; 
+        // Nota: Dejé tu configuración de fallback por si acaso, aunque en Canvas se usa la variable global.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            // Tu configuración manual de fallback (aunque en Canvas siempre deberíamos usar __firebase_config)
             apiKey: "AIzaSyB2p7rjHo6gdnylnxBJ9yevP7ZPyfiKfyY",
             authDomain: "diegotinderleague.firebaseapp.com",
             projectId: "diegotinderleague",
@@ -241,8 +253,6 @@
         const counterDisplay = document.getElementById('counter-display');
         const passwordInput = document.getElementById('password-input');
         const controlMenu = document.getElementById('control-menu');
-        const decrementButton = document.getElementById('decrement-button');
-        const incrementButton = document.getElementById('increment-button');
         const dbStatusElement = document.getElementById('db-status');
         const errorMessageBox = document.getElementById('error-message');
         const errorTextElement = document.getElementById('error-text');
@@ -256,12 +266,13 @@
         function displayError(message) {
             errorTextElement.textContent = message;
             errorMessageBox.classList.remove('hidden');
+            console.error(message);
             setTimeout(() => {
                 errorMessageBox.classList.add('hidden');
             }, 8000);
         }
 
-        // Función para obtener la referencia del documento del contador
+        // Función para obtener la referencia del documento del contador (Privado)
         function getCounterDocRef(uid) {
             // Ruta segura: /artifacts/{appId}/users/{userId}/counter/value
             return doc(db, `artifacts/${appId}/users/${uid}/counter`, 'value');
@@ -283,17 +294,16 @@
                     const data = docSnap.data();
                     currentCount = typeof data.value === 'number' ? data.value : DEFAULT_COUNT;
                 } else {
-                    // Si no existe, usamos el valor por defecto y lo guardamos
+                    // Inicializa el contador si no existe
                     await saveCounter(DEFAULT_COUNT, uid);
                     currentCount = DEFAULT_COUNT;
                 }
                 counterDisplay.textContent = formatNumber(currentCount);
-                dbStatusElement.textContent = `Estado: Conectado. Valor: ${formatNumber(currentCount)}`;
+                dbStatusElement.textContent = `Estado: Conectado. UID: ${uid.substring(0, 8)}...`;
             } catch (error) {
                 console.error("Error al cargar o inicializar el contador:", error);
-                displayError("Error DB. Revisa las Reglas de Seguridad de Firestore.");
+                displayError("Error DB. La carga falló. Revisa las reglas de seguridad de Firestore.");
                 counterDisplay.textContent = "Error DB";
-                dbStatusElement.textContent = `Estado: Error DB. UID: ${uid}`;
             }
         }
 
@@ -302,54 +312,50 @@
             if (!dbReady || !uid) return;
             try {
                 const docRef = getCounterDocRef(uid);
-                await setDoc(docRef, { value: value });
+                await setDoc(docRef, { value: value }, { merge: true });
                 dbStatusElement.textContent = `Estado: Valor guardado: ${formatNumber(value)}`;
             } catch (error) {
                 console.error("Error al guardar el contador:", error);
-                displayError("Error de guardado. Revisa permisos de escritura.");
+                displayError("Error de guardado. Asegúrate de que tu autenticación funciona y tienes permisos de escritura.");
             }
         }
         
         // ----------------------------------------------------
-        // AUTENTICACIÓN Y ARRANQUE (CORREGIDO)
+        // AUTENTICACIÓN Y ARRANQUE (Lógica Reforzada)
         // ----------------------------------------------------
         async function authenticateAndLoad() {
             try {
                 if (initialAuthToken) {
-                    // 1. Prioridad: Token personalizado de Canvas (debe funcionar si las reglas son correctas)
+                    // 1. PRIORIDAD MÁXIMA: Intentar con el token personalizado de Canvas
+                    console.log("Intentando autenticación con token de Canvas...");
                     await signInWithCustomToken(auth, initialAuthToken);
                     console.log("Autenticación exitosa con token personalizado.");
                     dbStatusElement.textContent = 'Estado: Token Auth OK.';
                 } else {
-                    // 2. Fallback: Inicio de sesión anónimo (puede fallar en algunos entornos)
-                    await signInAnonymously(auth);
-                    console.log("Autenticación anónima exitosa.");
-                    dbStatusElement.textContent = 'Estado: Auth Anónima OK.';
+                    // 2. FALLBACK: Si no hay token, intentamos anónimo, PERO sabemos que puede fallar.
+                    console.warn("Token de autenticación de Canvas no encontrado. Intentando signInAnonymously...");
+                    await signInAnonymously(auth); 
+                    dbStatusElement.textContent = 'Estado: Auth Anónima OK (Riesgoso).';
                 }
 
-                // Esperamos el estado final de autenticación para cargar los datos
+                // El listener maneja el estado final
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
                         dbReady = true;
-                        console.log("Usuario autenticado con UID:", userId);
                         await loadCounter(userId); // Carga el contador una vez autenticado
                     } else {
-                        // Esto no debería suceder si signInWithCustomToken fue exitoso, 
-                        // pero maneja el caso de desautenticación.
-                        console.log("Usuario desautenticado.");
+                        console.log("Usuario desautenticado o sesión perdida.");
                         dbStatusElement.textContent = 'Estado: Desconectado.';
                     }
                 });
             } catch (error) {
-                console.error("Error de autenticación CRÍTICO:", error);
+                // Capturamos el error de autenticación, que probablemente sea el 'auth/admin-restricted-operation'
                 const errorCode = error.code || 'unknown';
                 
                 let userMessage = `Error ${errorCode}. `;
                 if (errorCode === 'auth/admin-restricted-operation') {
-                    userMessage += "El inicio de sesión anónimo está restringido. Asegúrate de usar el token de Canvas.";
-                } else if (errorCode === 'auth/unauthorized-domain') {
-                    userMessage += "Dominio no autorizado. Añade tu dominio de GitHub Pages a la Consola de Firebase.";
+                    userMessage += "Operación Restringida. Esto pasa cuando la DB requiere un usuario registrado pero se intenta un acceso anónimo.";
                 } else {
                     userMessage += "Revisa la Consola de Firebase y la configuración de autenticación.";
                 }
@@ -360,7 +366,7 @@
             }
         }
         
-        // Ejecutamos la función de autenticación
+        // Ejecutamos la función de autenticación al inicio
         authenticateAndLoad();
 
         // ----------------------------------------------------
@@ -370,8 +376,7 @@
         // Función para actualizar el contador
         function updateCounter(amount) {
             if (!dbReady || !userId) {
-                console.error("Intento de actualizar el contador antes de la autenticación.");
-                displayError("Error: Espera la conexión con la base de datos.");
+                displayError("Error: Espera la conexión con la base de datos.");
                 return;
             }
             currentCount += amount;
@@ -388,19 +393,19 @@
             if (passwordInput.value === passwordCode) {
                 controlMenu.classList.remove('hidden');
                 passwordInput.blur();
-                passwordInput.value = '¡Menú Desbloqueado!';
+                passwordInput.value = '¡MENÚ DESBLOQUEADO!';
                 passwordInput.disabled = true;
-                passwordInput.classList.remove('focus:ring-pink-500', 'focus:border-pink-500');
+                passwordInput.classList.remove('focus:ring-pink-500', 'focus:border-pink-500', 'text-white');
                 passwordInput.classList.add('border-green-500', 'text-green-400');
             }
         });
 
         // Asignación de eventos a los botones
-        decrementButton.addEventListener('click', () => updateCounter(-1));
-        incrementButton.addEventListener('click', () => updateCounter(1));
+        document.getElementById('decrement-button').addEventListener('click', () => updateCounter(-1));
+        document.getElementById('increment-button').addEventListener('click', () => updateCounter(1));
 
         // ----------------------------------------------------
-        // Lógica de Audio (Música AGRESIVA de Fondo)
+        // Lógica de Audio (Música Épica de Fondo)
         // ----------------------------------------------------
         const audioHint = document.getElementById('audio-hint');
         let isMusicPlaying = false;
@@ -412,18 +417,9 @@
         distortion.connect(reverb);
         
         const synth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: 'square' },
-            envelope: {
-                attack: 0.1, 
-                decay: 0.2,
-                sustain: 0.5,
-                release: 0.5,
-            },
-            filter: {
-                Q: 1,
-                type: "highpass", 
-                rolloff: -12
-            }
+            oscillator: { type: 'sawtooth' }, // Cambiado a sawtooth para un sonido más agresivo
+            envelope: { attack: 0.1, decay: 0.2, sustain: 0.5, release: 0.5 },
+            filter: { Q: 1, type: "highpass", rolloff: -12 }
         }).connect(distortion);
 
         const aggressiveChords = [
@@ -471,12 +467,19 @@
             images.forEach(img => img.classList.add('hidden'));
 
             function rotateImage() {
+                // Oculta la imagen anterior (si existe)
+                if (currentIndex >= 0) {
+                    images[currentIndex].classList.add('hidden');
+                    images[currentIndex].style.animation = 'none';
+                }
+
                 currentIndex = (currentIndex + 1) % images.length;
                 const currentImage = images[currentIndex];
 
                 currentImage.classList.remove('hidden');
+                // Reinicia la animación
                 currentImage.style.animation = 'none';
-                void currentImage.offsetWidth; 
+                void currentImage.offsetWidth; // Trigger reflow
                 currentImage.style.animation = `image-scroll ${totalAnimationDuration / 1000}s infinite linear`;
             }
 
