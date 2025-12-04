@@ -1,513 +1,490 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diego's Tinder League</title>
-    <!-- Carga de Tailwind CSS para un diseño responsivo -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Íconos de Lucide React para los botones -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Tone.js para la música y sonidos -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-    <style>
-        /* 1. Fondo Azul Oscuro */
-        body {
-            background-color: #03045e; /* Azul muy oscuro */
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Oculta el desbordamiento de las imágenes animadas */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diego's Tinder League</title>
+    <!-- Carga de Tailwind CSS para un diseño responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Íconos de Lucide React para los botones -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tone.js para la música y sonidos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        /* 1. Estilos Base */
+        body {
+            background-color: #03045e; /* Azul muy oscuro */
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-        /* 2. Animación de las Imágenes de Fondo */
-        .image-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Asegura que el contador sea clickeable */
-            z-index: 10;
-        }
+        /* 2. Animación de las Imágenes de Fondo */
+        .image-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
 
-        .background-image {
-            position: absolute;
-            top: 0;
-            width: 150vw; /* Más ancho que la pantalla para el movimiento */
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.5; /* Opacidad para que el fondo oscuro se mantenga */
-            animation: image-scroll 40s infinite linear; /* Aumentado a 40s para el nuevo número de imágenes */
-            transition: opacity 1s ease-in-out;
-            transform: translateX(100vw); /* Inicialmente fuera de la pantalla a la derecha */
-        }
+        .background-image {
+            position: absolute;
+            top: 0;
+            width: 150vw;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            transform: translateX(100vw);
+        }
 
-        /* Definición de la animación específica solicitada: Rápida entrada, freno progresivo al centro, pausa, y salida rápida */
-        @keyframes image-scroll {
-            /* Entra rápido desde la derecha */
-            0% { transform: translateX(100vw); opacity: 0; }
-            5% { transform: translateX(5vw); opacity: 0.5; } /* Frenada progresiva */
-            10% { transform: translateX(0); opacity: 0.7; }
-            
-            /* Pausa de 2 segundos (del 10% al 20% del ciclo de 30s) */
-            10% { transform: translateX(0); opacity: 0.7; }
-            20% { transform: translateX(0); opacity: 0.7; }
-            
-            /* Salida rápida a la izquierda */
-            25% { transform: translateX(-5vw); opacity: 0.5; } /* Aceleración progresiva */
-            30% { transform: translateX(-150vw); opacity: 0; }
-            
-            /* El resto del tiempo estará invisible para permitir la rotación */
-            31% { transform: translateX(100vw); opacity: 0; }
-            100% { transform: translateX(100vw); opacity: 0; }
-        }
+        @keyframes image-scroll {
+            0% { transform: translateX(100vw); opacity: 0; }
+            5% { transform: translateX(5vw); opacity: 0.5; }
+            10% { transform: translateX(0); opacity: 0.7; }
+            
+            10% { transform: translateX(0); opacity: 0.7; }
+            20% { transform: translateX(0); opacity: 0.7; }
+            
+            25% { transform: translateX(-5vw); opacity: 0.5; }
+            30% { transform: translateX(-150vw); opacity: 0; }
+            
+            31% { transform: translateX(100vw); opacity: 0; }
+            100% { transform: translateX(100vw); opacity: 0; }
+        }
 
-        /* 3. Contador con Múltiples Colores (Efecto Gemini) y Glitch */
-        .gemini-counter {
-            font-size: 10vw; /* Responsivo: 10% del ancho del viewport */
-            font-weight: 900;
-            text-align: center;
-            color: white;
-            z-index: 20;
-            position: relative;
-            user-select: none;
-            cursor: default;
-            
-            /* Animación lenta de text-shadow para simular colores móviles */
-            animation: color-shift 10s infinite alternate, glitch-effect 5s steps(2, start) infinite;
-        }
+        /* 3. Contador con Efecto Gemini y Glitch */
+        .gemini-counter {
+            font-size: 10vw;
+            font-weight: 900;
+            text-align: center;
+            color: white;
+            z-index: 20;
+            position: relative;
+            user-select: none;
+            cursor: default;
+            
+            animation: color-shift 10s infinite alternate, glitch-effect 5s steps(2, start) infinite;
+        }
 
-        /* Estilo para el Título Principal (Nuevo) */
-        .main-title {
-            font-size: 1.5rem; /* Ajuste para móviles */
-            font-weight: 700;
-            text-align: center;
-            color: #ff5e62; /* Un rojo/rosa agresivo que evoca Tinder */
-            margin-bottom: 2rem;
-            text-shadow: 0 0 10px rgba(255, 94, 98, 0.7);
-        }
+        .main-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #ff5e62; 
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255, 94, 98, 0.7);
+        }
 
-        /* Colores inspirados en la paleta de Google/Gemini */
-        @keyframes color-shift {
-            0% { 
-                text-shadow: 
-                    2px 2px 5px #4285F4, /* Azul */
-                    -2px -2px 5px #0F9D58; /* Verde */
-            }
-            25% {
-                 text-shadow: 
-                    2px 2px 5px #F4B400, /* Amarillo */
-                    -2px -2px 5px #DB4437; /* Rojo */
-            }
-            50% { 
-                text-shadow: 
-                    -2px 2px 5px #EA30E9, /* Magenta (como el color Gemini) */
-                    2px -2px 5px #00FFFF; /* Cyan */
-            }
-            75% { 
-                text-shadow: 
-                    2px -2px 5px #4285F4, /* Azul */
-                    -2px 2px 5px #F4B400; /* Amarillo */
-            }
-            100% { 
-                text-shadow: 
-                    -2px -2px 5px #DB4437, /* Rojo */
-                    2px 2px 5px #0F9D58; /* Verde */
-            }
-        }
-        
-        /* Efecto Glitch */
-        @keyframes glitch-effect {
-            0% {
-                transform: translate(0);
-            }
-            20% {
-                transform: translate(-3px, 3px);
-                opacity: 0.9;
-            }
-            40% {
-                transform: translate(-3px, -3px);
-            }
-            60% {
-                transform: translate(3px, 3px);
-                opacity: 0.95;
-            }
-            80% {
-                transform: translate(3px, -3px);
-            }
-            100% {
-                transform: translate(0);
-            }
-        }
+        @keyframes color-shift {
+            0% { text-shadow: 2px 2px 5px #4285F4, -2px -2px 5px #0F9D58; }
+            25% { text-shadow: 2px 2px 5px #F4B400, -2px -2px 5px #DB4437; }
+            50% { text-shadow: -2px 2px 5px #EA30E9, 2px -2px 5px #00FFFF; }
+            75% { text-shadow: 2px -2px 5px #4285F4, -2px 2px 5px #F4B400; }
+            100% { text-shadow: -2px -2px 5px #DB4437, 2px 2px 5px #0F9D58; }
+        }
+        
+        @keyframes glitch-effect {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); opacity: 0.9; }
+            40% { transform: translate(-3px, -3px); }
+            60% { transform: translate(3px, 3px); opacity: 0.95; }
+            80% { transform: translate(3px, -3px); }
+            100% { transform: translate(0); }
+        }
 
-        /* Ajuste para pantallas más grandes */
-        @media (min-width: 768px) {
-            .gemini-counter {
-                font-size: 6rem;
-            }
-            .main-title {
-                font-size: 3rem;
-            }
-        }
+        @media (min-width: 768px) {
+            .gemini-counter { font-size: 6rem; }
+            .main-title { font-size: 3rem; }
+        }
 
-        /* Estilo de los botones del menú oculto */
-        .control-button {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #1f2937, #111827);
-            box-shadow: 8px 8px 16px #0d121b, -8px -8px 16px #2b3a4f;
-            color: white;
-            font-size: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.1s ease-in-out;
-        }
-        .control-button:active {
-            box-shadow: inset 4px 4px 8px #0d121b, inset -4px -4px 8px #2b3a4f;
-            transform: scale(0.98);
-        }
+        /* 4. Estilo de botones */
+        .control-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1f2937, #111827);
+            box-shadow: 8px 8px 16px #0d121b, -8px -8px 16px #2b3a4f;
+            color: white;
+            font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
+        }
+        .control-button:active {
+            box-shadow: inset 4px 4px 8px #0d121b, inset -4px -4px 8px #2b3a4f;
+            transform: scale(0.98);
+        }
 
-        /* Mensaje para el usuario para activar el audio */
-        #audio-hint {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.2rem;
-            z-index: 50; /* Por encima de todo */
-        }
-    </style>
+        /* Mensaje para el usuario para activar el audio */
+        #audio-hint, #error-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            z-index: 50;
+            border: 3px solid #ff5e62;
+        }
+    </style>
 </head>
 <body>
-    
-    <!-- Contenedor para las imágenes de fondo -->
-    <div id="image-carousel" class="image-container">
-        <!-- ¡IMPORTANTE! Las rutas se han actualizado a la carpeta 'images' y se ha añadido un cuarto elemento -->
-        <img class="background-image hidden" data-index="0" src="./images/foto0.jpg" alt="Fondo 1">
-        <img class="background-image hidden" data-index="1" src="./images/foto1.jpg" alt="Fondo 2">
-        <img class="background-image hidden" data-index="2" src="./images/foto2.jpg" alt="Fondo 3">
-        <img class="background-image hidden" data-index="3" src="./images/foto3.jpg" alt="Fondo 4">
-    </div>
+    
+    <!-- Contenedor para las imágenes de fondo -->
+    <div id="image-carousel" class="image-container">
+        <!-- Asegúrate de que estas rutas son relativas al HTML y las imágenes existen en esa ubicación. -->
+        <img class="background-image hidden" data-index="0" src="./images/foto0.jpg" alt="Fondo 1" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+0'">
+        <img class="background-image hidden" data-index="1" src="./images/foto1.jpg" alt="Fondo 2" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+1'">
+        <img class="background-image hidden" data-index="2" src="./images/foto2.jpg" alt="Fondo 3" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+2'">
+        <img class="background-image hidden" data-index="3" src="./images/foto3.jpg" alt="Fondo 4" onerror="this.onerror=null;this.src='https://placehold.co/1200x800/282c34/white?text=Img+3'">
+    </div>
 
-    <!-- Mensaje para activar el audio -->
-    <div id="audio-hint" class="hidden">
-        Haz clic en cualquier parte para activar la música agresiva de fondo.
-    </div>
+    <!-- Mensaje para activar el audio -->
+    <div id="audio-hint" class="hidden">
+        Haz clic en cualquier parte para activar la música de fondo.
+    </div>
 
-    <!-- Contenido principal: Título, Contador y Menú -->
-    <main class="flex-grow flex flex-col items-center justify-center p-4 z-30 relative">
-        <!-- Nuevo Título Principal -->
-        <h1 class="main-title">Diego's Tinder League</h1>
+    <!-- Contenedor de mensajes de error de Firebase -->
+    <div id="error-message" class="hidden" style="color:#ff5e62; border-color:#ff5e62;">
+        <p>ERROR DE FIREBASE</p>
+        <p id="error-text" class="text-sm mt-2"></p>
+    </div>
+
+    <!-- Contenido principal: Título, Contador y Menú -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 z-30 relative">
+        <!-- Título Principal -->
+        <h1 class="main-title">Diego's Tinder League</h1>
+        
+        <!-- El Contador -->
+        <div id="counter-display" class="gemini-counter">Cargando...</div>
+        
+        <!-- Contenedor de estado de la DB (Para el debugging) -->
+        <div id="db-status" class="text-white mt-4 text-xs bg-gray-700/50 p-2 rounded-lg opacity-75">
+            Estado: Esperando autenticación...
+        </div>
+    </main>
+    
+    <!-- Sección de Control (Entrada de Texto y Botones) -->
+    <footer class="w-full p-4 bg-gray-900/50 backdrop-blur-sm z-30">
+        <div class="max-w-md mx-auto">
+            
+            <!-- Entrada de texto para desbloquear el menú -->
+            <input 
+                type="text" 
+                id="password-input" 
+                placeholder="Introduce el código de control aquí..."
+                class="w-full p-3 mb-4 text-white bg-gray-700/80 border border-gray-600 rounded-xl focus:ring-pink-500 focus:border-pink-500 transition duration-300"
+            >
+
+            <!-- Menú Oculto -->
+            <div id="control-menu" class="hidden flex justify-center space-x-8 mt-4">
+                
+                <!-- Botón Decrementar -->
+                <button id="decrement-button" class="control-button shadow-2xl">
+                    <i data-lucide="minus" class="w-10 h-10"></i>
+                </button>
+                
+                <!-- Botón Incrementar -->
+                <button id="increment-button" class="control-button shadow-2xl">
+                    <i data-lucide="plus" class="w-10 h-10"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        // ----------------------------------------------------
+        // IMPORTS Y CONFIGURACIÓN DE FIREBASE
+        // ----------------------------------------------------
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        <!-- El Contador -->
-        <div id="counter-display" class="gemini-counter">Cargando...</div>
-    </main>
-    
-    <!-- Sección de Control (Entrada de Texto y Botones) -->
-    <footer class="w-full p-4 bg-gray-900/50 backdrop-blur-sm z-30">
-        <div class="max-w-md mx-auto">
-            
-            <!-- Entrada de texto para desbloquear el menú -->
-            <input 
-                type="text" 
-                id="password-input" 
-                placeholder="Introduce el código de control aquí..."
-                class="w-full p-3 mb-4 text-white bg-gray-700/80 border border-gray-600 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition duration-300"
-            >
+        // Habilitar logs de debug
+        setLogLevel('debug');
 
-            <!-- Menú Oculto -->
-            <div id="control-menu" class="hidden flex justify-center space-x-8 mt-4">
-                
-                <!-- Botón Decrementar -->
-                <button id="decrement-button" class="control-button shadow-2xl">
-                    <i data-lucide="minus" class="w-10 h-10"></i>
-                </button>
-                
-                <!-- Botón Incrementar -->
-                <button id="increment-button" class="control-button shadow-2xl">
-                    <i data-lucide="plus" class="w-10 h-10"></i>
-                </button>
-            </div>
-        </div>
-    </footer>
-
-    <script type="module">
-        // ----------------------------------------------------
-        // IMPORTS Y CONFIGURACIÓN DE FIREBASE
-        // ----------------------------------------------------
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // --- INSTRUCCIÓN IMPORTANTE PARA PRODUCCIÓN ---
-        // DEBES REEMPLAZAR EL OBJETO 'customFirebaseConfig' CON LA CONFIGURACIÓN DE TU PROYECTO REAL DE FIREBASE.
-        // Puedes obtener esta configuración desde la consola de Firebase -> Configuración del Proyecto.
-        const customFirebaseConfig = {
-            apiKey: "AIzaSyB2p7rjHo6gdnylnxBJ9yevP7ZPyfiKfyY",
-            authDomain: "diegotinderleague.firebaseapp.com",
-            projectId: "diegotinderleague",
-            storageBucket: "diegotinderleague.firebasestorage.app",
-            messagingSenderId: "571797323174",
-            appId: "1:571797323174:web:cefde0084c28f79378a367",
-
+        // CONFIGURACIÓN DE FIREBASE (Usamos variables de entorno de Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; 
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            // Tu configuración manual de fallback (aunque en Canvas siempre deberíamos usar __firebase_config)
+            apiKey: "AIzaSyB2p7rjHo6gdnylnxBJ9yevP7ZPyfiKfyY",
+            authDomain: "diegotinderleague.firebaseapp.com",
+            projectId: "diegotinderleague",
+            storageBucket: "diegotinderleague.firebasestorage.app",
+            messagingSenderId: "571797323174",
+            appId: "1:571797323174:web:cefde0084c28f79378a367",
+            measurementId: "G-MHVZC38ZL4"
         };
-    
-        // ---------------------------------------------
-        
-        // La configuración real que se usa en local/producción
-        const firebaseConfig = customFirebaseConfig;
-        
-        // Usamos un ID de artefacto estático para el path de Firestore
-        const appId = firebaseConfig.projectId || 'diego-tinder-league'; 
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+        // Inicialización de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        let userId = null;
+        let dbReady = false;
+        
+        // Constantes para el DOM
+        const counterDisplay = document.getElementById('counter-display');
+        const passwordInput = document.getElementById('password-input');
+        const controlMenu = document.getElementById('control-menu');
+        const decrementButton = document.getElementById('decrement-button');
+        const incrementButton = document.getElementById('increment-button');
+        const dbStatusElement = document.getElementById('db-status');
+        const errorMessageBox = document.getElementById('error-message');
+        const errorTextElement = document.getElementById('error-text');
 
-        // Inicialización de Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        let userId = null;
-        let dbReady = false;
-        
-        // Constantes para el contador
-        const counterDisplay = document.getElementById('counter-display');
-        const passwordInput = document.getElementById('password-input');
-        const controlMenu = document.getElementById('control-menu');
-        const decrementButton = document.getElementById('decrement-button');
-        const incrementButton = document.getElementById('increment-button');
-        const passwordCode = "Diego2500";
-        const DEFAULT_COUNT = 2397; // Valor inicial si no hay datos guardados
-        let currentCount = DEFAULT_COUNT; 
+        // Constantes para la lógica
+        const passwordCode = "Diego2500";
+        const DEFAULT_COUNT = 2397;
+        let currentCount = DEFAULT_COUNT; 
 
-        // Función para obtener la referencia del documento del contador
-        function getCounterDocRef(uid) {
-            // Ruta para el contador del usuario: /artifacts/{appId}/users/{userId}/counter/value
-            // Nota: La estructura usa 'users/{userId}' y 'artifacts/{appId}' para simular un path seguro.
-            return doc(db, `artifacts/${appId}/users/${uid}/counter`, 'value');
+        // Función para mostrar errores en la interfaz de usuario
+        function displayError(message) {
+            errorTextElement.textContent = message;
+            errorMessageBox.classList.remove('hidden');
+            setTimeout(() => {
+                errorMessageBox.classList.add('hidden');
+            }, 8000);
         }
 
-        // Función para formatear el número (añadir el punto como separador de miles)
-        function formatNumber(number) {
-            return number.toLocaleString('es-ES');
-        }
+        // Función para obtener la referencia del documento del contador
+        function getCounterDocRef(uid) {
+            // Ruta segura: /artifacts/{appId}/users/{userId}/counter/value
+            return doc(db, `artifacts/${appId}/users/${uid}/counter`, 'value');
+        }
 
-        // Función para cargar el contador desde Firestore
-        async function loadCounter(uid) {
+        // Función para formatear el número
+        function formatNumber(number) {
+            return number.toLocaleString('es-ES');
+        }
+
+        // Función para cargar el contador desde Firestore
+        async function loadCounter(uid) {
+            dbStatusElement.textContent = "Estado: Cargando contador...";
+            try {
+                const docRef = getCounterDocRef(uid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentCount = typeof data.value === 'number' ? data.value : DEFAULT_COUNT;
+                } else {
+                    // Si no existe, usamos el valor por defecto y lo guardamos
+                    await saveCounter(DEFAULT_COUNT, uid);
+                    currentCount = DEFAULT_COUNT;
+                }
+                counterDisplay.textContent = formatNumber(currentCount);
+                dbStatusElement.textContent = `Estado: Conectado. Valor: ${formatNumber(currentCount)}`;
+            } catch (error) {
+                console.error("Error al cargar o inicializar el contador:", error);
+                displayError("Error DB. Revisa las Reglas de Seguridad de Firestore.");
+                counterDisplay.textContent = "Error DB";
+                dbStatusElement.textContent = `Estado: Error DB. UID: ${uid}`;
+            }
+        }
+
+        // Función para guardar el contador en Firestore
+        async function saveCounter(value, uid) {
+            if (!dbReady || !uid) return;
+            try {
+                const docRef = getCounterDocRef(uid);
+                await setDoc(docRef, { value: value });
+                dbStatusElement.textContent = `Estado: Valor guardado: ${formatNumber(value)}`;
+            } catch (error) {
+                console.error("Error al guardar el contador:", error);
+                displayError("Error de guardado. Revisa permisos de escritura.");
+            }
+        }
+        
+        // ----------------------------------------------------
+        // AUTENTICACIÓN Y ARRANQUE (CORREGIDO)
+        // ----------------------------------------------------
+        async function authenticateAndLoad() {
             try {
-                const docRef = getCounterDocRef(uid);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    currentCount = data.value || DEFAULT_COUNT;
+                if (initialAuthToken) {
+                    // 1. Prioridad: Token personalizado de Canvas (debe funcionar si las reglas son correctas)
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Autenticación exitosa con token personalizado.");
+                    dbStatusElement.textContent = 'Estado: Token Auth OK.';
                 } else {
-                    // Si no existe, usamos el valor por defecto y lo guardamos
-                    await saveCounter(DEFAULT_COUNT, uid);
-                }
-                counterDisplay.textContent = formatNumber(currentCount);
-            } catch (error) {
-                console.error("Error al cargar el contador:", error);
-                counterDisplay.textContent = formatNumber(currentCount); // Muestra el valor por defecto en caso de error
-            }
-        }
-
-        // Función para guardar el contador en Firestore
-        async function saveCounter(value, uid) {
-            if (!dbReady || !uid) return;
-            try {
-                const docRef = getCounterDocRef(uid);
-                await setDoc(docRef, { value: value });
-            } catch (error) {
-                console.error("Error al guardar el contador:", error);
-            }
-        }
-        
-        // ----------------------------------------------------
-        // AUTENTICACIÓN Y ARRANQUE
-        // ----------------------------------------------------
-        // En un entorno de producción, la forma más simple es usar autenticación anónima.
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                dbReady = true;
-                // Una vez autenticado, cargamos el contador guardado
-                await loadCounter(userId);
-            } else {
-                // Si no hay usuario, iniciamos sesión de forma anónima
-                try {
+                    // 2. Fallback: Inicio de sesión anónimo (puede fallar en algunos entornos)
                     await signInAnonymously(auth);
-                } catch (error) {
-                    console.error("Error de autenticación:", error);
-                    counterDisplay.textContent = "Error de Auth";
-                }
-            }
-        });
-
-        // ----------------------------------------------------
-        // Lógica del Contador y del Menú Oculto
-        // ----------------------------------------------------
-        
-        // Función para actualizar el contador (y guardarlo en la DB)
-        function updateCounter(amount) {
-            currentCount += amount;
-            counterDisplay.textContent = formatNumber(currentCount);
-            if (dbReady && userId) {
-                // Llama a la función de guardado
-                saveCounter(currentCount, userId);
-            }
-        }
-
-        // Inicializa los íconos de Lucide (los signos +/-)
-        lucide.createIcons();
-        
-        // 4. Lógica para desbloquear el menú
-        passwordInput.addEventListener('input', () => {
-            if (passwordInput.value === passwordCode) {
-                controlMenu.classList.remove('hidden');
-                passwordInput.blur(); // Opcional: Quita el foco del input
-                passwordInput.value = '¡Menú Desbloqueado!';
-                passwordInput.disabled = true;
-                passwordInput.classList.add('border-green-500');
-            }
-        });
-
-        // 5. Asignación de eventos a los botones
-        decrementButton.addEventListener('click', () => updateCounter(-1));
-        incrementButton.addEventListener('click', () => updateCounter(1));
-
-        // ----------------------------------------------------
-        // Lógica de Audio (Música AGRESIVA de Fondo)
-        // ----------------------------------------------------
-        const audioHint = document.getElementById('audio-hint');
-        let isMusicPlaying = false;
-        
-        // Muestra el mensaje para que el usuario active el audio
-        audioHint.classList.remove('hidden');
-
-        // 1. Efectos agresivos: Distortion y Reverb
-        const distortion = new Tone.Distortion(0.8).toDestination(); // Distorsión alta
-        const reverb = new Tone.Reverb(3).toDestination();
-        distortion.connect(reverb);
-        
-        // Crea un sintetizador con un ataque rápido y timbre áspero
-        const synth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: 'square' }, // Onda cuadrada es más dura que sierra
-            envelope: {
-                attack: 0.1,  // Ataque rápido
-                decay: 0.2,
-                sustain: 0.5, // Sostenido más largo
-                release: 0.5,
-            },
-            filter: {
-                Q: 1,
-                type: "highpass", // Filtro de paso alto para un sonido más "delgado" y cortante
-                rolloff: -12
-            }
-        }).connect(distortion); // Conecta al Distortion
-
-        // 2. Melodía "agresiva" simple: Progresión en La menor (Am, G, F, E)
-        const aggressiveChords = [
-            ['A3', 'C4', 'E4'],  // Am
-            ['G3', 'B3', 'D4'],  // G
-            ['F3', 'A3', 'C4'],  // F
-            ['E3', 'G#3', 'B3'], // E (dominante)
-        ];
-        
-        let chordIndex = 0;
-
-        function playEpicMusic() {
-            if (isMusicPlaying) return;
-            isMusicPlaying = true;
-            audioHint.classList.add('hidden');
-            
-            // Inicia Tone.js
-            Tone.start();
-
-            // Lógica de bucle para la progresión
-            new Tone.Loop(time => {
-                const notes = aggressiveChords[chordIndex % aggressiveChords.length];
-                
-                // Toca el acorde base
-                synth.triggerAttackRelease(notes, "1n", time, 0.6); // 0.6 volumen
-                
-                // Toca una octava más baja para el bajo
-                synth.triggerAttackRelease(notes[0].replace('3', '2'), "1n", time, 0.7); // Bajo (más prominente)
-                
-                chordIndex++;
-            }, "1n").start(0); // Bucle cada 1 nota (1 segundo a 120 BPM)
-            
-            // Inicia el transporte (el motor de tiempo)
-            Tone.Transport.bpm.value = 120; // BPM más rápido
-            Tone.Transport.start();
-        }
-
-        // Activación de la música con la primera interacción del usuario
-        document.body.addEventListener('click', playEpicMusic, { once: true });
-
-
-        // ----------------------------------------------------
-        // Lógica de la Rotación de Imágenes
-        // ----------------------------------------------------
-        const images = document.querySelectorAll('.background-image');
-        // Ajustamos la duración total de la animación a 40 segundos ya que hay 4 imágenes.
-        // Esto mantiene el tiempo de visibilidad en el centro en 10 segundos por imagen (25% del ciclo).
-        const totalAnimationDuration = 40000; 
-        const delayBetweenImages = totalAnimationDuration / images.length; 
-        let currentIndex = -1; 
-
-        function startImageCarousel() {
-            images.forEach(img => img.classList.add('hidden'));
-
-            function rotateImage() {
-                if (currentIndex >= 0) {
-                    const previousImage = images[currentIndex];
-                    previousImage.style.animationPlayState = 'paused';
-                    previousImage.style.opacity = '0';
-                    previousImage.classList.add('hidden');
+                    console.log("Autenticación anónima exitosa.");
+                    dbStatusElement.textContent = 'Estado: Auth Anónima OK.';
                 }
 
-                currentIndex = (currentIndex + 1) % images.length;
-                const currentImage = images[currentIndex];
-
-                // Forzamos el reinicio de la animación y la hacemos visible
-                currentImage.classList.remove('hidden');
-                currentImage.style.animation = 'none';
-                void currentImage.offsetWidth; 
-                currentImage.style.animation = `image-scroll ${totalAnimationDuration / 1000}s infinite linear`;
-            }
-
-            rotateImage();
-            setInterval(rotateImage, delayBetweenImages);
-        }
-
-        // Asegúrate de que las imágenes se carguen y la animación comience
-        window.onload = startImageCarousel;
-
-        // Lógica de backoff para la API (no necesaria para este app sin API, pero buena práctica)
-        async function fetchWithBackoff(url, options = {}, maxRetries = 5) {
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response;
-                } catch (error) {
-                    if (i === maxRetries - 1) throw error;
-                    const delay = Math.pow(2, i) * 1000;
-                    console.error(`Request failed. Retrying in ${delay / 1000}s...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
+                // Esperamos el estado final de autenticación para cargar los datos
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        dbReady = true;
+                        console.log("Usuario autenticado con UID:", userId);
+                        await loadCounter(userId); // Carga el contador una vez autenticado
+                    } else {
+                        // Esto no debería suceder si signInWithCustomToken fue exitoso, 
+                        // pero maneja el caso de desautenticación.
+                        console.log("Usuario desautenticado.");
+                        dbStatusElement.textContent = 'Estado: Desconectado.';
+                    }
+                });
+            } catch (error) {
+                console.error("Error de autenticación CRÍTICO:", error);
+                const errorCode = error.code || 'unknown';
+                
+                let userMessage = `Error ${errorCode}. `;
+                if (errorCode === 'auth/admin-restricted-operation') {
+                    userMessage += "El inicio de sesión anónimo está restringido. Asegúrate de usar el token de Canvas.";
+                } else if (errorCode === 'auth/unauthorized-domain') {
+                    userMessage += "Dominio no autorizado. Añade tu dominio de GitHub Pages a la Consola de Firebase.";
+                } else {
+                    userMessage += "Revisa la Consola de Firebase y la configuración de autenticación.";
                 }
+
+                displayError(userMessage);
+                dbStatusElement.textContent = `Estado: Error Auth CRÍTICO (${errorCode})`;
+                counterDisplay.textContent = "Error Auth";
             }
         }
-    </script>
+        
+        // Ejecutamos la función de autenticación
+        authenticateAndLoad();
+
+        // ----------------------------------------------------
+        // Lógica del Contador y del Menú Oculto
+        // ----------------------------------------------------
+        
+        // Función para actualizar el contador
+        function updateCounter(amount) {
+            if (!dbReady || !userId) {
+                console.error("Intento de actualizar el contador antes de la autenticación.");
+                displayError("Error: Espera la conexión con la base de datos.");
+                return;
+            }
+            currentCount += amount;
+            counterDisplay.textContent = formatNumber(currentCount);
+            // Llama a la función de guardado
+            saveCounter(currentCount, userId);
+        }
+
+        // Inicializa los íconos de Lucide
+        lucide.createIcons();
+        
+        // Lógica para desbloquear el menú
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value === passwordCode) {
+                controlMenu.classList.remove('hidden');
+                passwordInput.blur();
+                passwordInput.value = '¡Menú Desbloqueado!';
+                passwordInput.disabled = true;
+                passwordInput.classList.remove('focus:ring-pink-500', 'focus:border-pink-500');
+                passwordInput.classList.add('border-green-500', 'text-green-400');
+            }
+        });
+
+        // Asignación de eventos a los botones
+        decrementButton.addEventListener('click', () => updateCounter(-1));
+        incrementButton.addEventListener('click', () => updateCounter(1));
+
+        // ----------------------------------------------------
+        // Lógica de Audio (Música AGRESIVA de Fondo)
+        // ----------------------------------------------------
+        const audioHint = document.getElementById('audio-hint');
+        let isMusicPlaying = false;
+        
+        audioHint.classList.remove('hidden');
+
+        const distortion = new Tone.Distortion(0.8).toDestination();
+        const reverb = new Tone.Reverb(3).toDestination();
+        distortion.connect(reverb);
+        
+        const synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: 'square' },
+            envelope: {
+                attack: 0.1, 
+                decay: 0.2,
+                sustain: 0.5,
+                release: 0.5,
+            },
+            filter: {
+                Q: 1,
+                type: "highpass", 
+                rolloff: -12
+            }
+        }).connect(distortion);
+
+        const aggressiveChords = [
+            ['A3', 'C4', 'E4'], 
+            ['G3', 'B3', 'D4'],
+            ['F3', 'A3', 'C4'],
+            ['E3', 'G#3', 'B3'],
+        ];
+        
+        let chordIndex = 0;
+
+        function playEpicMusic() {
+            if (isMusicPlaying) return;
+            isMusicPlaying = true;
+            audioHint.classList.add('hidden');
+            
+            Tone.start();
+
+            new Tone.Loop(time => {
+                const notes = aggressiveChords[chordIndex % aggressiveChords.length];
+                
+                synth.triggerAttackRelease(notes, "1n", time, 0.6);
+                synth.triggerAttackRelease(notes[0].replace('3', '2'), "1n", time, 0.7);
+                
+                chordIndex++;
+            }, "1n").start(0);
+            
+            Tone.Transport.bpm.value = 120;
+            Tone.Transport.start();
+        }
+
+        // Activación de la música con la primera interacción del usuario
+        document.body.addEventListener('click', playEpicMusic, { once: true });
+
+
+        // ----------------------------------------------------
+        // Lógica de la Rotación de Imágenes
+        // ----------------------------------------------------
+        const images = document.querySelectorAll('.background-image');
+        const totalAnimationDuration = 40000; 
+        const delayBetweenImages = totalAnimationDuration / images.length; 
+        let currentIndex = -1; 
+
+        function startImageCarousel() {
+            images.forEach(img => img.classList.add('hidden'));
+
+            function rotateImage() {
+                currentIndex = (currentIndex + 1) % images.length;
+                const currentImage = images[currentIndex];
+
+                currentImage.classList.remove('hidden');
+                currentImage.style.animation = 'none';
+                void currentImage.offsetWidth; 
+                currentImage.style.animation = `image-scroll ${totalAnimationDuration / 1000}s infinite linear`;
+            }
+
+            rotateImage();
+            setInterval(rotateImage, delayBetweenImages);
+        }
+
+        window.onload = startImageCarousel;
+    </script>
 </body>
 </html>
